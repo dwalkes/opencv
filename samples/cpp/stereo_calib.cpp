@@ -49,13 +49,12 @@ static int print_help()
             "         matrix separately) stereo. \n"
             " Calibrate the cameras and display the\n"
             " rectified results along with the computed disparity images.   \n" << endl;
-    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*do not view results*/] [-uncalibrated] [-s square_size_in_cm] <image list XML/YML file>\n" << endl;
+    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*do not view results*/] [-uncalibrated] [-s square_size_in_cm] <image list XML/YML file> [-dc /*display corners*/]\n" << endl;
     return 0;
 }
 
-
 static void
-StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true, float squareSize=1.f) 
+StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true, float squareSize=1.f, bool displayCorners=false) 
 {
     if( imagelist.size() % 2 != 0 )
     {
@@ -63,7 +62,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         return;
     }
 
-    bool displayCorners = false;//true;
     const int maxScale = 2;
     // ARRAY AND VECTOR STORAGE:
 
@@ -347,6 +345,7 @@ int main(int argc, char** argv)
     string imagelistfn;
     bool showRectified = true;
 	bool useCalibrated = true;
+	bool displayCorners = false;
 	float squareSize = 1.f;
 	
     for( int i = 1; i < argc; i++ )
@@ -371,6 +370,8 @@ int main(int argc, char** argv)
             showRectified = false;
         else if( string(argv[i]) == "--help" )
             return print_help();
+        else if( string(argv[i]) == "-dc" )
+			displayCorners = true;
         else if( string(argv[i]) == "-uncalibrated" )
 			useCalibrated = false;
 		else if( string(argv[i]) == "-s" )
@@ -411,6 +412,6 @@ int main(int argc, char** argv)
 
 	cout << "Starting stereo calibration with useCalibrated " << useCalibrated << " squareSize " << squareSize << "\n";
 
-    StereoCalib(imagelist, boardSize, useCalibrated, showRectified, squareSize);
+    StereoCalib(imagelist, boardSize, useCalibrated, showRectified, squareSize, displayCorners);
     return 0;
 }
