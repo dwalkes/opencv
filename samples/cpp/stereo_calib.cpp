@@ -49,13 +49,13 @@ static int print_help()
             "         matrix separately) stereo. \n"
             " Calibrate the cameras and display the\n"
             " rectified results along with the computed disparity images.   \n" << endl;
-    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*dot not view results*/] <image list XML/YML file>\n" << endl;
+    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*do not view results*/] [-uncalibrated] [-s square_size_in_cm] <image list XML/YML file>\n" << endl;
     return 0;
 }
 
 
 static void
-StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true)
+StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true, float squareSize=1.f) 
 {
     if( imagelist.size() % 2 != 0 )
     {
@@ -65,7 +65,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
 
     bool displayCorners = false;//true;
     const int maxScale = 2;
-    const float squareSize = 1.f;  // Set this to your actual square size
     // ARRAY AND VECTOR STORAGE:
 
     vector<vector<Point2f> > imagePoints[2];
@@ -347,7 +346,9 @@ int main(int argc, char** argv)
     Size boardSize;
     string imagelistfn;
     bool showRectified = true;
-
+	bool useCalibrated = true;
+	float squareSize = 1.f;
+	
     for( int i = 1; i < argc; i++ )
     {
         if( string(argv[i]) == "-w" )
@@ -370,6 +371,16 @@ int main(int argc, char** argv)
             showRectified = false;
         else if( string(argv[i]) == "--help" )
             return print_help();
+        else if( string(argv[i]) == "-uncalibrated" )
+			useCalibrated = false;
+		else if( string(argv[i]) == "-s" )
+		{
+			if( sscanf(argv[++i], "%f", &squareSize) !=1 || squareSize <= 0 )
+			{
+				cout << "invalid square size" << argv[i] << "(" << squareSize << ")" << "specified\n";
+				return print_help();
+			}
+		}
         else if( argv[i][0] == '-' )
         {
             cout << "invalid option " << argv[i] << endl;
@@ -398,6 +409,8 @@ int main(int argc, char** argv)
         return print_help();
     }
 
-    StereoCalib(imagelist, boardSize, true, showRectified);
+	cout << "Starting stereo calibration with useCalibrated " << useCalibrated << " squareSize " << squareSize << "\n";
+
+    StereoCalib(imagelist, boardSize, useCalibrated, showRectified, squareSize);
     return 0;
 }
